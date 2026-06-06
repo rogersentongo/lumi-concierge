@@ -276,12 +276,24 @@ def share():
             "display:grid;place-items:center;height:100vh;text-align:center'>"
             "<div><h2>Set <code>PUBLIC_URL</code> to your tunnel URL</h2>"
             "<p style='color:#888'>e.g. <code>PUBLIC_URL=https://xyz.trycloudflare.com</code> in .env, then reload.</p></div></body>")
-    import qrcode
-    import qrcode.image.svg
-    img = qrcode.make(PUBLIC_URL, image_factory=qrcode.image.svg.SvgImage)
-    buf = io.BytesIO()
-    img.save(buf)
-    svg = buf.getvalue().decode()
+    try:
+        import qrcode
+        qr = qrcode.QRCode(border=2)
+        qr.add_data(PUBLIC_URL)
+        qr.make(fit=True)
+        m = qr.get_matrix()
+        n = len(m)
+        cell = 9
+        size = n * cell
+        rects = "".join(
+            f'<rect x="{x*cell}" y="{y*cell}" width="{cell}" height="{cell}"/>'
+            for y, row in enumerate(m) for x, val in enumerate(row) if val
+        )
+        svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
+               f'viewBox="0 0 {size} {size}" shape-rendering="crispEdges">'
+               f'<rect width="{size}" height="{size}" fill="#fff"/><g fill="#000">{rects}</g></svg>')
+    except Exception as e:
+        svg = f"<p style='color:#c33'>QR unavailable: {str(e)[:140]}</p>"
     return HTMLResponse(
         f"<body style='font-family:system-ui;background:#07080a;color:#f4f6ef;"
         f"display:grid;place-items:center;height:100vh;text-align:center'>"

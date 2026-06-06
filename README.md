@@ -2,7 +2,17 @@
 
 *Built at the AI Tinkerers "Emotionally Intelligent AI Hackathon" (ElevenLabs + Tavus), NYC.*
 
-> **Lumi** is the voice concierge for a luxury hotel, **The Lumen**. Most voice agents read your **words**. Lumi reads your **tone** — say the same thing calm vs. frustrated and it answers differently: different pacing, word choice, escalation, what it shows on screen, and an expressive voice that matches the moment.
+> **Lumi** is the voice concierge for a luxury hotel, **The Lumen Hotel**. Most voice agents read your **words**. Lumi reads your **tone** — say the same thing calm vs. frustrated and it answers differently: different pacing, word choice, escalation, what it shows on screen, and an expressive voice that matches the moment.
+
+<p align="center">
+  <img src="docs/screenshots/welcome.png" width="245" alt="Lumi — liquid-glass concierge UI">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/venues.png" width="245" alt="Emotion-gated media: venue suggestions">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/qr.png" width="245" alt="Scan to open Lumi">
+</p>
+
+<p align="center"><sub>Left → right: the concierge UI · emotion-gated media in a real chat · scan to open the live PWA</sub></p>
 
 ## The problem
 Voice is eating the interface, but most agents "sound like they're reading a script in a sensory-deprivation chamber." Generation quality is solved; **emotional intelligence isn't.** An agent that can't hear frustration, match urgency, or shift tone when someone's upset isn't an agent — it's fancy hold music. Lumi treats **emotional voice as a first-class signal.**

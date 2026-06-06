@@ -4,9 +4,10 @@
 
 const COLORS = {
   calm: '#1a9d5b', happy: '#1a9d5b', relieved: '#1a9d5b', eager: '#c07c12',
-  neutral: '#5b6070', expectant: '#0a84ff',
+  neutral: '#5b6070', expectant: '#0a84ff', sad: '#4a6fa5',
   anxious: '#b8860b', frustrated: '#d2691e', angry: '#cc3a1f', distress: '#ff3b30',
 };
+const ecol = (e) => COLORS[e] || '#5b6070';   // never white -> always visible on glass
 
 const chat = document.getElementById('chat');
 const empty = document.getElementById('empty');
@@ -41,7 +42,7 @@ function bubble(role, text, opts = {}) {
   const who = document.createElement('span');
   who.className = 'who';
   who.innerHTML = role === 'user'
-    ? `guest${opts.emotion ? ' · <b style="color:' + (COLORS[opts.emotion] || '#fff') + '">' + opts.emotion.toUpperCase() + '</b>' : ''}`
+    ? `guest${opts.emotion ? ' · <b style="color:' + ecol(opts.emotion) + '">' + opts.emotion.toUpperCase() + '</b>' : ''}`
     : `Lumi${opts.tone ? ' · ' + opts.tone : ''}`;
   const b = document.createElement('div');
   b.className = 'bubble';
@@ -63,7 +64,7 @@ function bubble(role, text, opts = {}) {
 }
 
 function setEmotion(emotion, source) {
-  const col = COLORS[emotion] || '#f4f6ef';
+  const col = ecol(emotion);
   emotionChip.textContent = 'emotion: ' + emotion;
   emotionChip.style.color = col;
   emotionChip.style.borderColor = col;

@@ -45,3 +45,5 @@ server/media/
 
 # generated audio + voice previews (local only)
 app/out/
+
+run_demo.sh

@@ -12,8 +12,10 @@ HOTEL_PROFILE = """FACTS ABOUT THE LUMEN HOTEL (rely on these; do not invent oth
 DINING (room service is 24/7; Aria Restaurant, level 1, dinner 6–11pm):
 - Breakfast: Eggs Benedict $24, Buttermilk Pancakes $18, Avocado Toast $16, Lumen Roast coffee $6.
 - All day: The Lumen Burger $26, Caesar Salad $17, Club Sandwich $19, Vanilla Cheesecake $12.
-VENUES: The Pool (level 3, 6am–10pm); The Spa (level 2, by appointment); The Rooftop Bar
-(level 20, 5pm–1am); the Conservatory Lounge (lobby level); Aria Restaurant (level 1).
+VENUES: The Gym (level 4, open 24/7 with your room key — free weights, cardio machines,
+Peloton bikes, a yoga studio, towels + water provided); The Pool (level 3, 6am–10pm);
+The Spa (level 2, by appointment); The Rooftop Bar (level 20, 5pm–1am); the Conservatory
+Lounge (lobby level); Aria Restaurant (level 1).
 ROOMS: suites with king beds and city views; checkout 11am.
 POLICIES:
 - Security camera footage is released ONLY via a police report/court order — never directly to a guest.
