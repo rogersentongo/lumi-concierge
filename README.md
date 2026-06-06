@@ -57,7 +57,7 @@ cp .env.example .env      # add your ElevenLabs key (+ Ollama if you have it)
 ElevenLabs (expressive TTS) · self-hosted Ollama qwen3 + emotion2vec+/openSMILE · FastAPI · *(stretch: Tavus avatar, Redis cache, SearXNG image search).*
 
 ## Team
-`TODO`
+**Roger Sentongo** — built at the AI Tinkerers *Emotionally Intelligent AI Hackathon* (NYC).
 
 ## License
-`TODO` (e.g. MIT)
+© 2026 Roger Sentongo. Licensed under **[CC BY-NC 4.0](LICENSE)** — you're free to use, share, and adapt this **with attribution to Roger Sentongo**, but **commercial use requires prior written permission**. See [`LICENSE`](LICENSE).
