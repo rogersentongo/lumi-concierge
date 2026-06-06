@@ -42,7 +42,7 @@ mic → STT → emotion fusion (acoustic + prosody + lexical) → tone-adapted r
 Static, self-contained UI mockups live in [`docs/mockups/`](docs/mockups/) — open [`index.html`](docs/mockups/index.html). The centerpiece is [`live.html`](docs/mockups/live.html): one screen, three scenarios (lost AirPods / breakfast / safety), with the emotion read, inline spoken replies, emotion-gated media, and the Red-mode guardrail.
 
 ## Demo
-📹 *Video:* `TODO: youtube link`
+📹 **Demo video:** https://youtube.com/shorts/heVVbdCKAOs
 
 ## Run it yourself
 > The hosted demo uses our GPU server for the heavy models. The repo runs standalone with your own Ollama + ElevenLabs key, or in **local-fallback mode** (deterministic prosody heuristic) with no GPU.
