@@ -1,0 +1,18 @@
+{
+  "items": [
+    { "id": "eggs_benedict",  "kind": "food",  "title": "Eggs Benedict",          "caption": "$24 · brunch favourite",   "query": "eggs benedict plated restaurant breakfast",   "desc": "classic brunch: poached eggs, hollandaise, English muffin" },
+    { "id": "pancakes",       "kind": "food",  "title": "Buttermilk Pancakes",     "caption": "$18 · sweet",              "query": "buttermilk pancakes stack berries syrup",      "desc": "fluffy pancakes with berries and syrup; sweet breakfast" },
+    { "id": "avocado_toast",  "kind": "food",  "title": "Avocado Toast",           "caption": "$16 · light",              "query": "avocado toast poached egg cafe plated",        "desc": "light healthy breakfast: avocado toast with poached egg" },
+    { "id": "lumen_burger", "kind": "food",  "title": "The Lumen Burger",      "caption": "$26 · lunch/dinner",       "query": "gourmet cheeseburger fries restaurant",        "desc": "signature gourmet burger with fries; lunch or dinner" },
+    { "id": "caesar_salad",   "kind": "food",  "title": "Caesar Salad",            "caption": "$17 · light lunch",        "query": "caesar salad plated fresh restaurant",         "desc": "crisp caesar salad; light lunch option" },
+    { "id": "club_sandwich",  "kind": "food",  "title": "Club Sandwich",           "caption": "$19 · room service",       "query": "club sandwich triple decker fries",            "desc": "triple-decker club sandwich; popular room service" },
+    { "id": "cheesecake",     "kind": "food",  "title": "Vanilla Cheesecake",      "caption": "$12 · dessert",            "query": "new york cheesecake slice dessert plated",     "desc": "rich vanilla cheesecake; dessert" },
+    { "id": "coffee",         "kind": "food",  "title": "Lumen Roast",           "caption": "$6 · all day",             "query": "latte coffee cup cafe foam art",               "desc": "house coffee / latte; available all day" },
+    { "id": "rooftop_bar",    "kind": "venue", "title": "The Rooftop Bar",         "caption": "level 20 · 5pm–1am",  "query": "luxury hotel rooftop bar city skyline night",  "desc": "rooftop cocktail bar with skyline views; evenings" },
+    { "id": "pool",           "kind": "venue", "title": "The Pool",                "caption": "level 3 · 6am–10pm",  "query": "luxury hotel indoor swimming pool",            "desc": "the swimming pool / aquatic area" },
+    { "id": "spa",            "kind": "venue", "title": "The Spa",                 "caption": "level 2 · by appt",        "query": "luxury hotel spa treatment relaxation room",   "desc": "the spa: massage and treatments by appointment" },
+    { "id": "lounge",         "kind": "venue", "title": "Conservatory Lounge",     "caption": "lobby level",              "query": "elegant hotel lounge plush armchairs lobby",   "desc": "the Conservatory lounge off the lobby; seating area" },
+    { "id": "restaurant",     "kind": "venue", "title": "Aria Restaurant",         "caption": "level 1 · 6–11pm",    "query": "elegant fine dining restaurant interior",      "desc": "Aria, the fine-dining restaurant; dinner" },
+    { "id": "suite",          "kind": "venue", "title": "Lumen Suite",           "caption": "king · city view",         "query": "luxury hotel suite king bed city view",        "desc": "guest suite/room with king bed and city view" }
+  ]
+}

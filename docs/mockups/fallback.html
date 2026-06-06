@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Reliability</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="backlink" href="index.html">← mockups</a>
+  <div class="brand">
+    <span class="logo">lumi<b>.</b></span>
+    <span class="tag">reliability ladder</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="statline">
+    <span class="stat"><span class="dot live"></span> active tier <b id="activeTier">1 · model</b></span>
+    <span class="stat">reliability wins</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="panel glow" style="margin-bottom:22px;">
+    <div class="panel-head">
+      <div class="panel-title"><span class="bar"></span> the fallback ladder — it cannot fail</div>
+      <span class="note">click a tier to simulate a degrade</span>
+    </div>
+    <p style="font-size:14px; color:var(--muted);">Each rung is a strictly simpler, more robust path. We say this out loud on stage: if the model drops, pure math takes over; if the network drops, the laptop still runs the demo.</p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- LADDER -->
+    <div class="ladder" id="ladder">
+      <div class="rung active" data-tier="1">
+        <div class="num">1</div>
+        <div class="body">
+          <h4>Emotion model</h4>
+          <p>emotion2vec+ acoustic + wav2vec2 V·A·D + qwen3 lexical → fused. Best quality, GPU-served.</p>
+        </div>
+        <span class="chip on">primary</span>
+        <span class="arrow">↓</span>
+      </div>
+
+      <div class="rung" data-tier="2">
+        <div class="num">2</div>
+        <div class="body">
+          <h4>DSP heuristic</h4>
+          <p>openSMILE / librosa: pitch + energy + rate vs. a 5-sec calibrated baseline. Pure math — can’t crash, and it self-explains.</p>
+        </div>
+        <span class="chip">no GPU needed</span>
+        <span class="arrow">↓</span>
+      </div>
+
+      <div class="rung" data-tier="3">
+        <div class="num">3</div>
+        <div class="body">
+          <h4>Manual emotion toggle</h4>
+          <p>Operator forces the emotion live (panel →). Guarantees the hero beat lands even if detection is off on natural speech.</p>
+        </div>
+        <span class="chip">human override</span>
+        <span class="arrow">↓</span>
+      </div>
+
+      <div class="rung" data-tier="4">
+        <div class="num">4</div>
+        <div class="body">
+          <h4>Local TTS</h4>
+          <p>If ElevenLabs is down or rate-limited, fall back to on-device TTS. We still speak — just less expressively.</p>
+        </div>
+        <span class="chip">offline voice</span>
+        <span class="arrow">↓</span>
+      </div>
+
+      <div class="rung" data-tier="5">
+        <div class="num">5</div>
+        <div class="body">
+          <h4>Pre-recorded backup video</h4>
+          <p>If the venue network or the server dies entirely, play the UI-only capture. The demo always finishes.</p>
+        </div>
+        <span class="chip">last resort</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: live health + manual toggle -->
+    <div style="display:flex; flex-direction:column; gap:22px;">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar"></span> system health</div>
+        </div>
+        <div class="kv">
+          <div class="row"><span class="k">GPU infer · :8100</span><span class="v" id="hGpu" style="color:var(--lime)">● online</span></div>
+          <div class="row"><span class="k">tailscale link</span><span class="v" id="hNet" style="color:var(--lime)">● 14ms</span></div>
+          <div class="row"><span class="k">ollama (qwen3)</span><span class="v" id="hLlm" style="color:var(--lime)">● ready</span></div>
+          <div class="row"><span class="k">elevenlabs api</span><span class="v" id="hTts" style="color:var(--lime)">● ok · 38 cr left</span></div>
+          <div class="row"><span class="k">audio cache (text,emotion)</span><span class="v">● 12 hits</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar"></span> manual emotion override</div>
+          <span class="chip" id="ovChip">auto</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Tier 3 control. Force the read with one tap — the safety net for the live hero beat.</p>
+        <div class="switcher" style="margin-bottom:14px;">
+          <div class="seg active" data-ov="auto">⟳ auto</div>
+          <div class="seg" data-ov="calm">🙂 calm</div>
+          <div class="seg" data-ov="happy">😄 happy</div>
+          <div class="seg" data-ov="anxious">😟 anxious</div>
+          <div class="seg" data-ov="angry">😤 angry</div>
+          <div class="seg" data-ov="distress">🆘 distress</div>
+        </div>
+        <div class="verdict">
+          <div class="big" id="ovVerdict">AUTO</div>
+          <div class="conf">source <b id="ovSrc">model</b><br><span class="dim" id="ovNote">detection live</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar"></span> simulate degrade</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" onclick="degrade(1)">all green</button>
+          <button class="btn" onclick="degrade(2)">kill model</button>
+          <button class="btn" onclick="degrade(4)">kill ElevenLabs</button>
+          <button class="btn danger" onclick="degrade(5)">kill network</button>
+        </div>
+        <p class="note" style="margin-top:12px;" id="degradeNote">All systems nominal — running tier 1.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const TIERS = {
+  1: 'model', 2: 'DSP heuristic', 3: 'manual toggle', 4: 'local TTS', 5: 'backup video'
+};
+
+function setTier(t) {
+  document.querySelectorAll('#ladder .rung').forEach(r => {
+    r.classList.toggle('active', +r.dataset.tier === t);
+  });
+  document.getElementById('activeTier').textContent = t + ' · ' + TIERS[t];
+}
+
+document.querySelectorAll('#ladder .rung').forEach(r => {
+  r.addEventListener('click', () => setTier(+r.dataset.tier));
+});
+
+// manual override
+const ovColors = { calm:'var(--lime)', happy:'var(--lime)', anxious:'#ffc24d', angry:'#ff9a4d', distress:'var(--red)', auto:'var(--white)' };
+document.querySelectorAll('[data-ov]').forEach(seg => {
+  seg.addEventListener('click', () => {
+    document.querySelectorAll('[data-ov]').forEach(s => s.classList.remove('active'));
+    seg.classList.add('active');
+    const ov = seg.dataset.ov;
+    const v = document.getElementById('ovVerdict');
+    v.textContent = ov.toUpperCase();
+    v.style.color = ovColors[ov];
+    document.getElementById('ovChip').textContent = ov === 'auto' ? 'auto' : 'forced';
+    document.getElementById('ovChip').className = 'chip' + (ov === 'auto' ? '' : ' red');
+    document.getElementById('ovSrc').textContent = ov === 'auto' ? 'model' : 'operator';
+    document.getElementById('ovNote').textContent = ov === 'auto' ? 'detection live' : 'tier 3 override';
+    if (ov !== 'auto') setTier(3);
+  });
+});
+
+// degrade simulator
+function set(id, txt, color) { const el = document.getElementById(id); el.textContent = txt; el.style.color = color; }
+function degrade(level) {
+  const L = 'var(--lime)', R = 'var(--red)', A = 'var(--amber)';
+  const note = document.getElementById('degradeNote');
+  if (level === 1) {
+    set('hGpu','● online',L); set('hNet','● 14ms',L); set('hLlm','● ready',L); set('hTts','● ok · 38 cr left',L);
+    setTier(1); note.textContent = 'All systems nominal — running tier 1.';
+  } else if (level === 2) {
+    set('hGpu','● model err',R); set('hNet','● 14ms',L); set('hLlm','● ready',L); set('hTts','● ok',L);
+    setTier(2); note.textContent = 'Emotion model failed → dropped to tier 2 (DSP heuristic, pure math).';
+  } else if (level === 4) {
+    set('hGpu','● online',L); set('hNet','● 14ms',L); set('hLlm','● ready',L); set('hTts','● down',R);
+    setTier(4); note.textContent = 'ElevenLabs unreachable → tier 4 (local TTS). We still speak.';
+  } else if (level === 5) {
+    set('hGpu','● unreachable',R); set('hNet','● offline',R); set('hLlm','● unreachable',R); set('hTts','● down',R);
+    setTier(5); note.textContent = 'Network/server down → tier 5 (pre-recorded backup video). The demo still finishes.';
+  }
+}
+</script>
+
+</body>
+</html>

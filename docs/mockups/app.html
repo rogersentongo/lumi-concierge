@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Hero A/B</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="backlink" href="index.html">← mockups</a>
+  <div class="brand">
+    <span class="logo">lumi<b>.</b></span>
+    <span class="tag">hero · same words, different emotion</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="statline">
+    <span class="stat"><span class="dot live"></span> infer <b>online</b></span>
+    <span class="stat">gpu <b>RTX 5060 Ti</b></span>
+    <span class="stat">latency <b id="lat">0.74s</b></span>
+    <span class="stat"><b class="accent">$0</b>/inference</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- demo control -->
+  <div class="panel glow" style="margin-bottom:22px;">
+    <div class="panel-head">
+      <div class="panel-title"><span class="bar"></span> demo input — same words, different emotion</div>
+      <span class="note">hero beat · A/B comparison</span>
+    </div>
+    <div style="display:flex; gap:18px; align-items:flex-end; flex-wrap:wrap;">
+      <div style="flex:1; min-width:280px;">
+        <div style="font-size:18px; font-family:var(--mono); color:var(--white); border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:var(--panel-2);">
+          “Has anyone found a pair of AirPods? I left them in the lounge earlier.”
+        </div>
+        <p class="note" style="margin-top:9px;">🎙️ Lumi <b style="color:var(--lime)">detects</b> the emotion from the audio — the guest never says how they feel. These buttons only choose which recorded take of the same sentence to play through the detector.</p>
+      </div>
+      <div>
+        <div class="section-label" style="margin:0 0 8px;">▶ play recorded take</div>
+        <div class="switcher" id="switcher">
+          <div class="seg active" data-state="calm">▶ calm take</div>
+          <div class="seg" data-state="anxious">▶ anxious take</div>
+          <div class="seg" data-state="frustrated">▶ frustrated take</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- LEFT -->
+    <div style="display:flex; flex-direction:column; gap:22px;">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar"></span> conversation</div>
+          <span class="chip on">turn-based · push-to-talk</span>
+        </div>
+
+        <div class="transcript">
+          <div class="msg user">
+            <span class="who">guest</span>
+            <div class="bubble">Has anyone found a pair of AirPods? I left them in the lounge earlier.</div>
+          </div>
+          <div class="msg agent" id="agentMsg">
+            <span class="who">Lumi · <span id="toneWho">warm · helpful</span></span>
+            <div class="bubble" id="replyText">Let me check for you — I’ll look at our lost &amp; found right now. Which lounge were you in, and roughly when? Good chance it’s already been handed in.</div>
+          </div>
+        </div>
+
+        <div class="ptt-zone" style="margin-top:22px;">
+          <button class="ptt" id="ptt">
+            <span class="mic">🎙️</span>
+            <span>hold to talk</span>
+          </button>
+          <div class="meter" id="meter">
+            <span style="height:40%; animation-delay:0s"></span>
+            <span style="height:80%; animation-delay:.1s"></span>
+            <span style="height:55%; animation-delay:.2s"></span>
+            <span style="height:95%; animation-delay:.05s"></span>
+            <span style="height:65%; animation-delay:.25s"></span>
+            <span style="height:85%; animation-delay:.15s"></span>
+            <span style="height:45%; animation-delay:.3s"></span>
+            <span style="height:75%; animation-delay:.12s"></span>
+            <span style="height:60%; animation-delay:.22s"></span>
+          </div>
+          <div class="ptt-hint">space-bar or hold · STT: faster-whisper (self-hosted)</div>
+        </div>
+      </div>
+
+      <!-- voice synthesis -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar"></span> voice synthesis · elevenlabs flash v2.5</div>
+          <span class="chip on" id="toneChip">tone: warm · helpful</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:6px;">Same reply text — voice settings chosen by detected emotion. <b style="color:var(--white)">Lower stability = more emotional range.</b></p>
+        <div class="audio-row">
+          <div class="play">▶</div>
+          <div class="waveform" id="wave" style="flex:1;"></div>
+          <span class="note" id="dur">0:07</span>
+        </div>
+        <div class="voice-settings" id="voiceSettings">
+          <span class="vs">stability <b>0.42</b></span>
+          <span class="vs">style <b>0.32</b></span>
+          <span class="vs">speed <b>1.00×</b></span>
+          <span class="vs">voice <b>Lumi (Voice Design)</b></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT — emotion engine -->
+    <div class="panel glow">
+      <div class="panel-head">
+        <div class="panel-title"><span class="bar"></span> emotion engine</div>
+        <span class="chip on">acoustic-dominant fusion</span>
+      </div>
+
+      <div class="verdict" style="margin-bottom:6px;">
+        <div class="big" id="verdict">CALM</div>
+        <div class="conf">
+          confidence <b id="conf">0.83</b><br>
+          <span class="dim">emotion2vec+ · 9-class</span>
+        </div>
+      </div>
+      <p class="note" style="margin-bottom:18px;">acoustic read from the waveform — the LLM never sees the audio</p>
+
+      <div class="section-label">// valence · arousal · dominance</div>
+      <div class="vad">
+        <div class="axis-x"></div>
+        <div class="axis-y"></div>
+        <span class="lbl t">high arousal</span>
+        <span class="lbl b">low arousal</span>
+        <span class="lbl l">negative</span>
+        <span class="lbl r">positive</span>
+        <div class="trail" id="ghostA" style="display:none;"></div>
+        <div class="trail" id="ghostB" style="display:none;"></div>
+        <div class="dot-vad" id="vadDot" style="left:62%; top:65%;"></div>
+      </div>
+      <p class="note" style="text-align:center; margin-top:9px;">○ ghost dots = where the other takes land — same words, different region</p>
+      <div class="kv" style="margin:14px 0 20px;">
+        <div class="row"><span class="k">valence</span><span class="v" id="vV">+0.25</span></div>
+        <div class="row"><span class="k">arousal</span><span class="v" id="vA">−0.30</span></div>
+        <div class="row"><span class="k">dominance</span><span class="v" id="vD">+0.10</span></div>
+      </div>
+
+      <div class="section-label">// prosody vs. 5-sec baseline (openSMILE)</div>
+      <div class="prosody" style="margin-bottom:20px;">
+        <div class="prow">
+          <span class="name">pitch</span>
+          <div class="track"><div class="base"></div><div class="fill" id="pPitch"></div></div>
+          <span class="val" id="vPitch">−8%</span>
+        </div>
+        <div class="prow">
+          <span class="name">energy</span>
+          <div class="track"><div class="base"></div><div class="fill" id="pEnergy"></div></div>
+          <span class="val" id="vEnergy">−12%</span>
+        </div>
+        <div class="prow">
+          <span class="name">rate</span>
+          <div class="track"><div class="base"></div><div class="fill" id="pRate"></div></div>
+          <span class="val" id="vRate">−6%</span>
+        </div>
+      </div>
+
+      <div class="section-label">// fusion = 0.60 acoustic + 0.25 lexical + 0.15 heuristic</div>
+      <div class="fusion">
+        <div class="fbar">
+          <div class="top"><span class="src">acoustic · <b id="fAcLbl">calm</b></span><span class="pct">0.60</span></div>
+          <div class="bar"><i style="width:60%"></i></div>
+        </div>
+        <div class="fbar">
+          <div class="top"><span class="src">lexical · <b id="fLexLbl">neutral</b></span><span class="pct">0.25</span></div>
+          <div class="bar"><i class="lex" style="width:25%"></i></div>
+        </div>
+        <div class="fbar">
+          <div class="top"><span class="src">heuristic · <b id="fHeuLbl">low arousal</b></span><span class="pct">0.15</span></div>
+          <div class="bar"><i class="heu" style="width:15%"></i></div>
+        </div>
+      </div>
+
+      <div class="disagree" id="disagree" style="display:none;">
+        <span>⚠</span>
+        <div><b>Acoustic ≠ lexical.</b> <span id="disagreeText"></span> Acoustic wins — that’s the “it heard <i>how</i> I said it” moment.</div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+const STATES = {
+  calm: {
+    color: 'var(--lime)', verdict: 'CALM', conf: '0.83',
+    vad: { l: 62, t: 65, v: '+0.25', a: '−0.30', d: '+0.10' },
+    prosody: { pitch: -8, energy: -12, rate: -6 },
+    fusion: { ac: 'calm', lex: 'neutral', heu: 'low arousal' },
+    disagree: null,
+    tone: 'warm · helpful', latency: '0.74s', dur: '0:07',
+    reply: 'Let me check for you — I’ll look at our lost & found right now. Which lounge were you in, and roughly when? Good chance it’s already been handed in.',
+    voice: { stability: '0.42', style: '0.32', speed: '1.00×' },
+    waveAmp: 0.5
+  },
+  anxious: {
+    color: '#ffc24d', verdict: 'ANXIOUS', conf: '0.85',
+    vad: { l: 32, t: 27, v: '−0.35', a: '+0.45', d: '−0.25' },
+    prosody: { pitch: 14, energy: 12, rate: 20 },
+    fusion: { ac: 'anxious', lex: 'neutral', heu: 'high arousal' },
+    disagree: 'The words are a neutral question — but the voice is anxious: faster, higher-pitched. So Lumi reassures, not just answers.',
+    tone: 'warm · reassuring', latency: '0.72s', dur: '0:08',
+    reply: 'Don’t worry — let’s find them together. I’m checking lost & found and sending someone to sweep the lounge now. Most items turn up within the hour, and I’ll stay on it with you.',
+    voice: { stability: '0.40', style: '0.40', speed: '0.98×' },
+    waveAmp: 0.75
+  },
+  frustrated: {
+    color: '#ff9a4d', verdict: 'FRUSTRATED', conf: '0.88',
+    vad: { l: 20, t: 22, v: '−0.60', a: '+0.55', d: '+0.40' },
+    prosody: { pitch: 20, energy: 34, rate: 16 },
+    fusion: { ac: 'frustrated', lex: 'neutral', heu: 'high arousal' },
+    disagree: 'Same neutral question, but the tone is frustrated. Lumi acknowledges the frustration and leads with action, not policy.',
+    tone: 'empathetic · action-first', latency: '0.71s', dur: '0:09',
+    reply: 'I hear you — that’s frustrating, and I’m sorry you’re having to chase this. Here’s what I’m doing right now: checking lost & found and sending a staff member to the lounge. I’ll come back to you within 15 minutes, found or not.',
+    voice: { stability: '0.30', style: '0.50', speed: '1.00×' },
+    waveAmp: 1.0
+  }
+};
+
+function prosodyBar(el, valEl, delta) {
+  const pct = Math.min(Math.abs(delta), 100) / 100 * 50;
+  el.classList.toggle('neg', delta < 0);
+  if (delta >= 0) { el.style.left = '50%'; el.style.width = pct + '%'; }
+  else { el.style.left = (50 - pct) + '%'; el.style.width = pct + '%'; }
+  valEl.textContent = (delta >= 0 ? '+' : '−') + Math.abs(delta) + '%';
+}
+
+function drawWave(amp) {
+  const wave = document.getElementById('wave');
+  wave.innerHTML = '';
+  for (let i = 0; i < 46; i++) {
+    const seed = Math.sin(i * 1.7) * Math.cos(i * 0.6);
+    const h = 14 + Math.abs(seed) * 86 * amp;
+    const bar = document.createElement('i');
+    bar.style.height = Math.min(h, 100) + '%';
+    wave.appendChild(bar);
+  }
+}
+
+function setState(name) {
+  const s = STATES[name];
+  const v = document.getElementById('verdict');
+  v.textContent = s.verdict; v.style.color = s.color;
+  document.getElementById('conf').textContent = s.conf;
+  document.getElementById('lat').textContent = s.latency;
+
+  const dot = document.getElementById('vadDot');
+  dot.style.left = s.vad.l + '%'; dot.style.top = s.vad.t + '%';
+  dot.style.background = s.color;
+  const dim = s.color === 'var(--lime)' ? 'var(--lime-dim)' : (s.color === '#ffc24d' ? 'rgba(255,194,77,0.15)' : 'rgba(255,154,77,0.15)');
+  dot.style.boxShadow = `0 0 0 5px ${dim}, 0 0 22px ${s.color}`;
+  document.getElementById('vV').textContent = s.vad.v;
+  document.getElementById('vA').textContent = s.vad.a;
+  document.getElementById('vD').textContent = s.vad.d;
+
+  // ghost dots = the other two takes
+  const others = Object.keys(STATES).filter(k => k !== name);
+  [['ghostA', others[0]], ['ghostB', others[1]]].forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (!key) { el.style.display = 'none'; return; }
+    const o = STATES[key];
+    el.style.display = 'block';
+    el.style.left = o.vad.l + '%'; el.style.top = o.vad.t + '%';
+    el.style.width = '15px'; el.style.height = '15px';
+    el.style.background = o.color; el.style.opacity = '0.22';
+  });
+
+  prosodyBar(document.getElementById('pPitch'), document.getElementById('vPitch'), s.prosody.pitch);
+  prosodyBar(document.getElementById('pEnergy'), document.getElementById('vEnergy'), s.prosody.energy);
+  prosodyBar(document.getElementById('pRate'), document.getElementById('vRate'), s.prosody.rate);
+
+  document.getElementById('fAcLbl').textContent = s.fusion.ac;
+  document.getElementById('fLexLbl').textContent = s.fusion.lex;
+  document.getElementById('fHeuLbl').textContent = s.fusion.heu;
+
+  const dis = document.getElementById('disagree');
+  if (s.disagree) { dis.style.display = 'flex'; document.getElementById('disagreeText').textContent = s.disagree; }
+  else { dis.style.display = 'none'; }
+
+  document.getElementById('replyText').textContent = s.reply;
+  document.getElementById('toneWho').textContent = s.tone;
+  document.getElementById('toneChip').textContent = 'tone: ' + s.tone;
+  document.getElementById('dur').textContent = s.dur;
+
+  document.getElementById('voiceSettings').innerHTML =
+    `<span class="vs">stability <b>${s.voice.stability}</b></span>` +
+    `<span class="vs">style <b>${s.voice.style}</b></span>` +
+    `<span class="vs">speed <b>${s.voice.speed}</b></span>` +
+    `<span class="vs">voice <b>Lumi (Voice Design)</b></span>`;
+
+  drawWave(s.waveAmp);
+
+  document.querySelectorAll('#switcher .seg').forEach(seg => {
+    const on = seg.dataset.state === name;
+    seg.classList.toggle('active', on);
+  });
+}
+
+document.querySelectorAll('#switcher .seg').forEach(seg => {
+  seg.addEventListener('click', () => setState(seg.dataset.state));
+});
+
+const ptt = document.getElementById('ptt');
+const press = () => ptt.classList.add('listening');
+const release = () => ptt.classList.remove('listening');
+ptt.addEventListener('mousedown', press);
+ptt.addEventListener('mouseup', release);
+ptt.addEventListener('mouseleave', release);
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); press(); } });
+document.addEventListener('keyup', e => { if (e.code === 'Space') release(); });
+
+setState('calm');
+</script>
+
+</body>
+</html>

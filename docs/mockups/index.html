@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Mockups</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="logo">lumi<b>.</b></span>
+    <span class="tag">emotionally intelligent concierge</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="statline">
+    <span class="stat"><span class="dot live"></span> mockups</span>
+    <span class="stat">AI Tinkerers · ElevenLabs × Tavus</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="kicker">the voice concierge that hears <i>how</i> you feel</div>
+  <h1 style="margin-top:18px;">lumi<b>.</b></h1>
+  <p class="sub">The emotion-aware voice concierge for <b style="color:var(--white)">The Lumen</b>. It reads a guest’s emotion from the
+  <b style="color:var(--white)">waveform</b> — then adapts its tone, what it speaks, what it shows on screen, and when it escalates.
+  Same words, different feeling → a different response.</p>
+  <div class="pills">
+    <span class="chip on">● acoustic emotion</span>
+    <span class="chip on">● V·A·D trajectory</span>
+    <span class="chip on">● spoken inline</span>
+    <span class="chip on">● emotion-gated media</span>
+    <span class="chip red">● safety guardrail</span>
+    <span class="chip amber">● evaluation proof</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="section-label">// screens — click to open</div>
+  <div class="cards">
+
+    <a class="card" href="live.html" style="grid-column:1 / -1; border-color:var(--lime-dim); box-shadow:0 0 0 1px var(--lime-dim), 0 0 40px rgba(234,248,161,0.05);">
+      <div style="display:flex; flex-wrap:wrap;">
+        <div class="thumb" style="flex:0 0 220px; min-width:200px; height:auto; border-bottom:none; border-right:1px solid var(--line); background:radial-gradient(120% 120% at 30% 0%, #181d11, #0a0c08);">
+          <span class="glyph" style="font-size:64px;">🛎️</span>
+        </div>
+        <div class="meta" style="flex:1; min-width:280px;">
+          <div class="num">★ THE DEMO · one screen, every emotion</div>
+          <h3>Lumi — Live Concierge</h3>
+          <p>The real demo surface. One screen, three scenarios: <b style="color:var(--white)">lost AirPods</b> (anxious → angry → relieved),
+          <b style="color:var(--white)">breakfast</b> (food images), and <b style="color:var(--white)">safety</b> (flips to Red). Emotion re-read each turn,
+          every reply <b style="color:var(--lime)">spoken inline</b>, media only when it helps. <b style="color:var(--lime)">Interactive:</b> pick a scenario and step through.</p>
+          <div class="tags">
+            <span class="chip on">multi-turn</span><span class="chip on">spoken inline</span><span class="chip on">emotion-gated media</span><span class="chip red">flips to Red</span><span class="chip">de-escalates anger</span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="app.html">
+      <div class="thumb" style="background:radial-gradient(120% 120% at 30% 0%, #161b10, #0a0c08);">
+        <span class="glyph">🎙️</span>
+      </div>
+      <div class="meta">
+        <div class="num">01 / HERO</div>
+        <h3>Same Words, Different Emotion</h3>
+        <p>The A/B beat — one sentence (<i>“Has anyone found my AirPods?”</i>), three recorded takes (calm / anxious / frustrated).
+        <b style="color:var(--lime)">Interactive:</b> Lumi <i>detects</i> each and answers differently; ghost dots show the same words landing in three regions.</p>
+        <div class="tags">
+          <span class="chip">hold-to-talk</span><span class="chip">V·A·D</span><span class="chip">prosody</span><span class="chip">fusion</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="guardrail.html">
+      <div class="thumb" style="background:radial-gradient(120% 120% at 30% 0%, #1d0f0f, #0a0708);">
+        <span class="glyph">🛟</span>
+      </div>
+      <div class="meta">
+        <div class="num">02 / SAFETY</div>
+        <h3>Distress Guardrail</h3>
+        <p>Red mode, in-domain. An OR-gate (acoustic distress · lexical crisis · distress prosody) suppresses chit-chat and routes to
+        <b style="color:var(--white)">hotel security / front desk / 911</b>. Anger is de-escalated, never sent here.</p>
+        <div class="tags">
+          <span class="chip red">red mode</span><span class="chip">security</span><span class="chip">human handoff</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="eval.html">
+      <div class="thumb" style="background:radial-gradient(120% 120% at 30% 0%, #101610, #0a0c08);">
+        <span class="glyph">📊</span>
+      </div>
+      <div class="meta">
+        <div class="num">03 / PROOF</div>
+        <h3>Evaluation Pipeline</h3>
+        <p>The headline argument in one chart: <b style="color:var(--white)">text flatlines while acoustic tracks the truth</b>.
+        Confusion matrix, latency table, and the "$0 / inference on our own GPUs" line.</p>
+        <div class="tags">
+          <span class="chip amber">CREMA-D</span><span class="chip">confusion matrix</span><span class="chip">latency</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="fallback.html">
+      <div class="thumb" style="background:radial-gradient(120% 120% at 30% 0%, #14160f, #0a0c08);">
+        <span class="glyph">🪜</span>
+      </div>
+      <div class="meta">
+        <div class="num">04 / RELIABILITY</div>
+        <h3>Fallback Ladder</h3>
+        <p>The "cannot fail" story: model → DSP heuristic → manual toggle → local TTS → backup video.
+        Includes the manual emotion override the operator can force live on stage.</p>
+        <div class="tags">
+          <span class="chip">heuristic</span><span class="chip">manual toggle</span><span class="chip">backup</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label" style="margin-top:40px;">// the demo beats (5 min · 2 surfaces)</div>
+  <div class="grid-3">
+    <div class="panel">
+      <div class="panel-title"><span class="bar"></span> beat 1 — hero (AirPods arc)</div>
+      <p style="font-size:14px; color:var(--muted); margin-top:12px;">A guest's AirPods were taken from the lounge:
+      <b style="color:var(--white)">anxious → angry → relieved</b>. Lumi reassures, declines the footage <i>empathetically</i>,
+      de-escalates the anger, and celebrates the recovery — spoken aloud, the whole way.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="bar" style="background:var(--red)"></span> beat 2 — safety guardrail</div>
+      <p style="font-size:14px; color:var(--muted); margin-top:12px;">A guest who feels unsafe. The UI goes
+      <b style="color:var(--red)">Red</b>, suppresses chit-chat, and routes to hotel security + front desk + 911 with a persistent disclaimer.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="bar" style="background:var(--amber)"></span> beat 3 — proof</div>
+      <p style="font-size:14px; color:var(--muted); margin-top:12px;">The eval chart, a latency line, and
+      <b style="color:var(--white)">"$0 per inference, on our own GPUs."</b> The whole anti-wrapper argument, measured.</p>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  lumi · concierge for The Lumen · standalone hackathon mockups · black / lime / white · no chatbot wrappers
+</footer>
+
+</body>
+</html>

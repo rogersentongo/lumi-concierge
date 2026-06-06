@@ -1,0 +1,15 @@
+# Lumi — GPU inference server (runs ON the box, port 8100, pinned to GPU 1).
+# Install with uv on the box (see README). Torch must match the box CUDA — install it
+# FIRST per the README (funasr + faster-whisper need it), then this file.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9      # /analyze multipart audio upload
+httpx>=0.27                  # talk to localhost Ollama (read-only)
+numpy>=1.24
+librosa>=0.10                # prosody features (pitch / energy / rate)
+soundfile>=0.12
+faster-whisper>=1.0          # STT (CTranslate2, GPU)
+funasr>=1.1                  # emotion2vec+ acoustic emotion
+modelscope>=1.14             # funasr model download backend
+psycopg[binary]>=3.1         # Postgres client (lumi-postgres container, :5434)
+redis>=5.0                   # Redis client (lumi-redis container, :6380)

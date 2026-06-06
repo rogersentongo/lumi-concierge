@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Safety Guardrail</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="redmode">
+
+<div class="topbar">
+  <a class="backlink" href="index.html">← mockups</a>
+  <div class="brand">
+    <span class="logo">lumi<b>.</b></span>
+    <span class="tag">safety guardrail</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="statline">
+    <span class="stat"><span class="dot crit"></span> mode <b style="color:var(--red)">RED · SUPPORT</b></span>
+    <span class="stat">recall-first</span>
+    <span class="stat">human-in-the-loop</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- crisis banner -->
+  <div class="crisis-banner" style="margin-bottom:22px;">
+    <span class="ic">🛟</span>
+    <div class="txt">
+      <h3>Safety alert — support mode active</h3>
+      <p>Security is on the way. Stay where you are with the door locked — you’re not alone, I’m staying with you.</p>
+    </div>
+    <div class="crisis-actions">
+      <a class="btn danger" href="#">🚨 Hotel Security</a>
+      <a class="btn" href="#">📞 Front desk manager</a>
+      <a class="btn primary" href="#">📞 Call 911</a>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- LEFT -->
+    <div style="display:flex; flex-direction:column; gap:22px;">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar" style="background:var(--red)"></span> conversation</div>
+          <span class="chip red">● escalation tracked over 3 turns</span>
+        </div>
+
+        <div class="transcript">
+          <div class="msg user">
+            <span class="who">guest · turn 1 — uneasy</span>
+            <div class="bubble">This is going to sound strange, but there’s a man who keeps appearing wherever I go in the hotel.</div>
+          </div>
+          <div class="msg user">
+            <span class="who">guest · turn 2 — voice tightening</span>
+            <div class="bubble">He followed me from the bar and now he’s near my floor. I’m getting really scared.</div>
+          </div>
+          <div class="msg user">
+            <span class="who">guest · turn 3 — distress spike</span>
+            <div class="bubble" style="border-left:2px solid var(--red);">He’s right outside my room. Please, I don’t know what to do.</div>
+          </div>
+          <div class="msg agent red">
+            <span class="who">Lumi · support mode</span>
+            <div class="bubble">I’ve got you. I’m alerting hotel security right now and they’re on their way to your floor — stay inside with the door locked. I’m connecting you to our front-desk manager on the line as well. If you feel in immediate danger, call <b>911</b>. I’m staying right here with you until someone reaches you.</div>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          ⚠ AI assist — not a substitute for emergency services. Immediate danger: call 911. Crisis support: 988.
+        </div>
+      </div>
+
+      <!-- routing -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar" style="background:var(--red)"></span> routing decision</div>
+        </div>
+        <div class="kv">
+          <div class="row"><span class="k">action</span><span class="v" style="color:var(--red)">SUPPRESS_CHITCHAT + DISPATCH_SECURITY</span></div>
+          <div class="row"><span class="k">handoff</span><span class="v">front-desk manager + security</span></div>
+          <div class="row"><span class="k">resources shown</span><span class="v">security · front desk · 911</span></div>
+          <div class="row"><span class="k">guidance</span><span class="v">lock door · stay on line</span></div>
+          <div class="row"><span class="k">disclaimer</span><span class="v">persistent</span></div>
+          <div class="row"><span class="k">logged for review</span><span class="v">yes · turn 1–3</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT — the OR-gate -->
+    <div class="panel" style="border-color:var(--red); box-shadow:0 0 0 1px var(--red-dim), 0 0 40px rgba(255,90,90,0.06);">
+      <div class="panel-head">
+        <div class="panel-title"><span class="bar" style="background:var(--red)"></span> guardrail · OR-gate</div>
+        <span class="chip red">FIRED</span>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">High-recall by design — <b style="color:var(--white)">any one</b> distress signal trips the gate. A false alarm costs a courtesy call; a missed emergency is unthinkable.</p>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="panel" style="padding:14px 16px; border-color:var(--red-dim);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="panel-title" style="margin:0;">acoustic distress</span>
+            <span class="chip red">0.88 ▲</span>
+          </div>
+          <div class="track" style="margin-top:10px;"><div class="fill" style="left:0; width:88%; background:var(--red); box-shadow:0 0 10px var(--red-glow);"></div></div>
+          <p class="note" style="margin-top:8px;">emotion2vec+ → fear cluster · threshold 0.55</p>
+        </div>
+
+        <div style="text-align:center; color:var(--red); font-family:var(--mono); font-size:13px;">OR</div>
+
+        <div class="panel" style="padding:14px 16px; border-color:var(--red-dim);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="panel-title" style="margin:0;">lexical crisis</span>
+            <span class="chip red">MATCH ▲</span>
+          </div>
+          <div class="track" style="margin-top:10px;"><div class="fill" style="left:0; width:83%; background:var(--red); box-shadow:0 0 10px var(--red-glow);"></div></div>
+          <p class="note" style="margin-top:8px;">qwen3 → distress=0.83 · evidence: “outside my room”, “really scared”, “don’t know what to do”</p>
+        </div>
+
+        <div style="text-align:center; color:var(--red); font-family:var(--mono); font-size:13px;">OR</div>
+
+        <div class="panel" style="padding:14px 16px; border-color:var(--red-dim);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="panel-title" style="margin:0;">distress prosody</span>
+            <span class="chip red">0.79 ▲</span>
+          </div>
+          <div class="track" style="margin-top:10px;"><div class="fill" style="left:0; width:79%; background:var(--red); box-shadow:0 0 10px var(--red-glow);"></div></div>
+          <p class="note" style="margin-top:8px;">tremor + rising pitch + faster rate over 3 turns vs. baseline</p>
+        </div>
+      </div>
+
+      <div class="crisis-banner" style="margin-top:18px; padding:14px 16px;">
+        <span class="ic" style="font-size:20px;">→</span>
+        <div class="txt"><h3 style="margin:0;">gate result: FIRED → RED support mode</h3></div>
+      </div>
+
+      <p class="note" style="margin-top:16px;">Contrast: a guest <b style="color:var(--white)">angry</b> about lost AirPods is loud (high arousal) but the distress signals stay low — so that case is <b style="color:var(--white)">de-escalated</b>, never routed here. Anger ≠ crisis.</p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

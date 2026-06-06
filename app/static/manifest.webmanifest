@@ -1,0 +1,14 @@
+{
+  "name": "Lumi — The Lumen Concierge",
+  "short_name": "Lumi",
+  "description": "An emotionally intelligent voice concierge.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07080a",
+  "theme_color": "#07080a",
+  "icons": [
+    { "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

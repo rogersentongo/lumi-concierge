@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Evaluation</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="backlink" href="index.html">← mockups</a>
+  <div class="brand">
+    <span class="logo">lumi<b>.</b></span>
+    <span class="tag">evaluation pipeline</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="statline">
+    <span class="stat"><span class="dot live"></span> dataset <b>CREMA-D + self-recorded hospitality clips</b></span>
+    <span class="stat">480 clips · 6 emotions</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- stat cards -->
+  <div class="grid-3" style="margin-bottom:22px;">
+    <div class="statcard">
+      <div class="k">acoustic accuracy</div>
+      <div class="v">71%</div>
+      <div class="sub">emotion2vec+ · 6-class · weighted F1 0.69</div>
+    </div>
+    <div class="statcard">
+      <div class="k">text-only accuracy</div>
+      <div class="v white" style="color:var(--cyan)">38%</div>
+      <div class="sub">qwen3 on transcript · barely above chance</div>
+    </div>
+    <div class="statcard">
+      <div class="k">latency · read to first audio</div>
+      <div class="v">0.74s</div>
+      <div class="sub">p50 end-to-end · <b class="accent">$0</b> / inference</div>
+    </div>
+  </div>
+
+  <!-- headline chart -->
+  <div class="panel glow" style="margin-bottom:22px;">
+    <div class="panel-head">
+      <div class="panel-title"><span class="bar"></span> the headline — text flatlines, acoustic tracks the truth</div>
+      <div style="display:flex; gap:14px; font-family:var(--mono); font-size:11px;">
+        <span style="color:var(--muted-2)">— ground truth</span>
+        <span style="color:var(--lime)">— acoustic</span>
+        <span style="color:var(--cyan)">— text-only</span>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Per-clip predicted <b style="color:var(--white)">arousal</b> across identical-script clips — e.g. <i>“Has anyone found my AirPods?”</i> — spoken in different emotions. The words are identical; only the sound changes — so the text-only model can’t follow.</p>
+    <svg id="chart" viewBox="0 0 720 300" style="width:100%; height:auto;"></svg>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- confusion matrix -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="bar"></span> confusion matrix · acoustic</div>
+        <span class="note">rows = true · cols = predicted</span>
+      </div>
+      <div id="matrix" style="display:grid; gap:3px;"></div>
+      <p class="note" style="margin-top:12px;">Strong diagonal. Most confusion is the expected neighbor pair (fear↔sad, anger↔disgust) — surfaced, not hidden.</p>
+    </div>
+
+    <!-- latency breakdown -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="bar"></span> latency breakdown · turn pipeline</div>
+        <span class="chip on">p50 0.74s</span>
+      </div>
+      <div id="latency" style="display:flex; flex-direction:column; gap:14px;"></div>
+      <p class="note" style="margin-top:14px;">STT, acoustic and lexical run in parallel; TTS streams. All self-hosted except ElevenLabs.</p>
+    </div>
+
+  </div>
+
+  <!-- per-emotion + method compare -->
+  <div class="panel" style="margin-top:22px;">
+    <div class="panel-head">
+      <div class="panel-title"><span class="bar"></span> per-emotion recall — acoustic vs. text-only</div>
+    </div>
+    <div id="peremotion" style="display:flex; flex-direction:column; gap:16px;"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------- headline line chart ---------- */
+(function(){
+  const W = 720, H = 300, padL = 56, padR = 18, padT = 24, padB = 46;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const cy = padT + plotH/2;
+  const ground   = [ 0.85, -0.62, 0.55, 0.92, -0.45, 0.74, -0.82, 0.35, 0.88, -0.55, 0.70, -0.40 ];
+  const acoustic = [ 0.78, -0.54, 0.49, 0.84, -0.36, 0.68, -0.73, 0.29, 0.80, -0.47, 0.63, -0.31 ];
+  const text     = [ 0.06, -0.03, 0.09, 0.05, 0.00, 0.07, -0.04, 0.03, 0.08, 0.01, 0.05, -0.02 ];
+  const n = ground.length;
+  const X = i => padL + (plotW * i / (n - 1));
+  const Y = v => cy - v * (plotH/2 - 6);
+
+  const svg = document.getElementById('chart');
+  const NS = 'http://www.w3.org/2000/svg';
+  const add = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
+
+  // grid lines
+  for (let g = -1; g <= 1; g += 0.5) {
+    add('line', { x1: padL, y1: Y(g), x2: W - padR, y2: Y(g), stroke: '#1a1e25', 'stroke-width': 1 });
+    add('text', { x: padL - 10, y: Y(g) + 4, fill: '#5b6058', 'font-size': 11, 'font-family': 'monospace', 'text-anchor': 'end' }).textContent = g.toFixed(1);
+  }
+  // axis labels
+  add('text', { x: 14, y: padT + 8, fill: '#878d83', 'font-size': 11, 'font-family': 'monospace' }).textContent = 'arousal';
+  add('text', { x: padL, y: H - 14, fill: '#5b6058', 'font-size': 11, 'font-family': 'monospace' }).textContent = 'clip 1';
+  add('text', { x: W - padR, y: H - 14, fill: '#5b6058', 'font-size': 11, 'font-family': 'monospace', 'text-anchor': 'end' }).textContent = 'clip 12';
+
+  const poly = (data, color, dash, w) => {
+    const pts = data.map((v, i) => X(i) + ',' + Y(v)).join(' ');
+    add('polyline', { points: pts, fill: 'none', stroke: color, 'stroke-width': w, 'stroke-dasharray': dash || 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: dash ? 0.7 : 1 });
+    if (!dash) data.forEach((v, i) => add('circle', { cx: X(i), cy: Y(v), r: 3.2, fill: color }));
+  };
+  poly(ground, '#5b6058', '5 5', 1.5);
+  poly(text, '#6fd3e0', null, 2);
+  poly(acoustic, '#eaf8a1', null, 2.5);
+})();
+
+/* ---------- confusion matrix ---------- */
+(function(){
+  const labels = ['ANG','DIS','FEA','HAP','NEU','SAD'];
+  // rows=true, cols=pred; diagonal strong
+  const M = [
+    [0.78, 0.09, 0.04, 0.03, 0.03, 0.03],
+    [0.11, 0.71, 0.05, 0.04, 0.05, 0.04],
+    [0.05, 0.04, 0.69, 0.03, 0.06, 0.13],
+    [0.04, 0.03, 0.03, 0.74, 0.11, 0.05],
+    [0.03, 0.04, 0.05, 0.09, 0.72, 0.07],
+    [0.03, 0.03, 0.12, 0.03, 0.07, 0.72]
+  ];
+  const grid = document.getElementById('matrix');
+  grid.style.gridTemplateColumns = `46px repeat(${labels.length}, 1fr)`;
+  const cell = (txt, style) => { const d = document.createElement('div'); d.textContent = txt; d.style.cssText = style; return d; };
+  const base = 'font-family:monospace; font-size:11px; display:flex; align-items:center; justify-content:center; padding:8px 0; border-radius:5px;';
+  // header row
+  grid.appendChild(cell('', base));
+  labels.forEach(l => grid.appendChild(cell(l, base + 'color:var(--muted);')));
+  M.forEach((row, r) => {
+    grid.appendChild(cell(labels[r], base + 'color:var(--muted);'));
+    row.forEach((val, c) => {
+      const diag = r === c;
+      const col = diag ? `rgba(234,248,161,${0.15 + val})` : `rgba(255,90,90,${val*1.6})`;
+      const fg = diag ? '#0a0c08' : (val > 0.08 ? '#fff' : '#5b6058');
+      grid.appendChild(cell(val.toFixed(2), base + `background:${col}; color:${fg}; font-weight:${diag?700:400};`));
+    });
+  });
+})();
+
+/* ---------- latency breakdown ---------- */
+(function(){
+  const stages = [
+    ['STT · faster-whisper', 0.21, 'var(--lime)'],
+    ['acoustic · emotion2vec+', 0.18, 'var(--lime)'],
+    ['V·A·D · wav2vec2', 0.09, 'var(--lime)'],
+    ['lexical · qwen3', 0.22, 'var(--cyan)'],
+    ['fusion (math)', 0.02, 'var(--violet)'],
+    ['answer · qwen3 first token', 0.31, 'var(--cyan)'],
+    ['TTS · ElevenLabs Flash', 0.40, '#fff']
+  ];
+  const max = 0.40;
+  const wrap = document.getElementById('latency');
+  stages.forEach(([name, t, col]) => {
+    const row = document.createElement('div');
+    row.innerHTML =
+      `<div style="display:flex; justify-content:space-between; font-family:monospace; font-size:12px; margin-bottom:5px;">
+         <span style="color:var(--muted)">${name}</span><span style="color:var(--white)">${t.toFixed(2)}s</span></div>
+       <div class="track"><div class="fill" style="left:0; width:${(t/max*100)}%; background:${col}; box-shadow:0 0 8px ${col};"></div></div>`;
+    wrap.appendChild(row);
+  });
+})();
+
+/* ---------- per-emotion recall ---------- */
+(function(){
+  const data = [
+    ['anger', 0.78, 0.41], ['disgust', 0.71, 0.33], ['fear', 0.69, 0.29],
+    ['happy', 0.74, 0.52], ['neutral', 0.72, 0.44], ['sad', 0.72, 0.31]
+  ];
+  const wrap = document.getElementById('peremotion');
+  data.forEach(([name, ac, tx]) => {
+    const row = document.createElement('div');
+    row.innerHTML =
+      `<div style="display:flex; justify-content:space-between; font-family:monospace; font-size:12px; margin-bottom:7px;">
+         <span style="text-transform:uppercase; letter-spacing:0.1em; color:var(--white)">${name}</span>
+         <span><span style="color:var(--lime)">acoustic ${(ac*100)|0}%</span> &nbsp; <span style="color:var(--cyan)">text ${(tx*100)|0}%</span></span></div>
+       <div style="display:flex; flex-direction:column; gap:5px;">
+         <div class="track" style="height:8px;"><div style="position:absolute; top:0; bottom:0; left:0; width:${ac*100}%; background:var(--lime); border-radius:6px; box-shadow:0 0 8px var(--lime-glow);"></div></div>
+         <div class="track" style="height:8px;"><div style="position:absolute; top:0; bottom:0; left:0; width:${tx*100}%; background:var(--cyan); border-radius:6px;"></div></div>
+       </div>`;
+    wrap.appendChild(row);
+  });
+})();
+</script>
+
+</body>
+</html>

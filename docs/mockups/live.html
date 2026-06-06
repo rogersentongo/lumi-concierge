@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Live Concierge</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="backlink" href="index.html">← mockups</a>
+  <div class="brand">
+    <span class="logo">lumi<b>.</b></span>
+    <span class="tag">concierge · the lumen</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="statline">
+    <span class="stat"><span class="dot live" id="modeDot"></span> mode <b id="modeLbl">NORMAL</b></span>
+    <span class="stat">memory <b>on</b></span>
+    <span class="stat">guardrail <b id="guardState">armed</b></span>
+    <span class="stat" id="counter">turn 1 / 4</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- control -->
+  <div class="panel glow" style="margin-bottom:22px;">
+    <div class="panel-head">
+      <div class="panel-title"><span class="bar"></span> one concierge, every emotion — this is the demo</div>
+      <span class="note">pick a scenario · step through the turns</span>
+    </div>
+    <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
+      <p style="flex:1; min-width:260px; font-size:14px; color:var(--muted); margin:0;">
+        Same Lumi, same screen. It re-reads emotion from the audio each turn, <b style="color:var(--white)">speaks every reply inline</b>,
+        shows media only when it helps — and on a real safety threat it <b style="color:var(--red)">flips to Red</b>. Service-anger is
+        <b style="color:var(--white)">de-escalated, not treated as a crisis</b>.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn" id="resetBtn">↺ reset</button>
+        <button class="btn primary" id="nextBtn">▶ next turn</button>
+      </div>
+    </div>
+    <div class="scenario-tabs" id="tabs">
+      <div class="tab active" data-scn="airpods">🎧 lost airpods</div>
+      <div class="tab" data-scn="dining">🍳 breakfast</div>
+      <div class="tab" data-scn="safety">🆘 safety</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- LEFT: conversation -->
+    <div class="panel" id="convPanel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="bar" id="convBar"></span> conversation</div>
+        <span class="chip on" id="convChip">turn-based · push-to-talk</span>
+      </div>
+
+      <!-- crisis banner (safety scenario only) -->
+      <div class="crisis-banner" id="crisis" style="display:none; margin-bottom:16px;">
+        <span class="ic">🛟</span>
+        <div class="txt">
+          <h3>Safety alert — support mode active</h3>
+          <p>Security is on the way. Stay where you are — you’re not alone.</p>
+        </div>
+        <div class="crisis-actions">
+          <a class="btn danger" href="#">🚨 Hotel Security</a>
+          <a class="btn" href="#">📞 Front desk</a>
+          <a class="btn primary" href="#">📞 Call 911</a>
+        </div>
+      </div>
+
+      <div class="transcript" id="transcript" style="max-height:520px; overflow-y:auto; padding-right:6px;"></div>
+
+      <div class="disclaimer" id="disclaimer" style="display:none;">
+        ⚠ AI assist — not a substitute for emergency services. Immediate danger: call 911. Crisis support: 988.
+      </div>
+    </div>
+
+    <!-- RIGHT: instruments -->
+    <div style="display:flex; flex-direction:column; gap:22px;">
+
+      <div class="panel glow">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar"></span> emotion engine · current turn</div>
+          <span class="chip on">per-turn read</span>
+        </div>
+
+        <div class="verdict" style="margin-bottom:16px;">
+          <div class="big" id="verdict">ANXIOUS</div>
+          <div class="conf">confidence <b id="conf">0.84</b><br><span class="dim">emotion2vec+ · this turn’s audio</span></div>
+        </div>
+
+        <div class="section-label">// V·A·D trajectory across the conversation</div>
+        <div class="vad">
+          <div class="axis-x"></div>
+          <div class="axis-y"></div>
+          <span class="lbl t">high arousal</span>
+          <span class="lbl b">low arousal</span>
+          <span class="lbl l">negative</span>
+          <span class="lbl r">positive</span>
+          <svg id="traj" viewBox="0 0 100 100" preserveAspectRatio="none"
+               style="position:absolute; inset:0; width:100%; height:100%; overflow:visible;"></svg>
+        </div>
+        <p class="note" style="text-align:center; margin-top:9px;">the path is the emotional arc — Lumi adapts to where it is</p>
+
+        <div class="kv" style="margin:14px 0 4px;">
+          <div class="row"><span class="k">valence</span><span class="v" id="vV">−0.40</span></div>
+          <div class="row"><span class="k">arousal</span><span class="v" id="vA">+0.45</span></div>
+          <div class="row"><span class="k">dominance</span><span class="v" id="vD">−0.30</span></div>
+        </div>
+
+        <div class="section-label" style="margin-top:18px;">// prosody vs. baseline (this turn)</div>
+        <div class="prosody">
+          <div class="prow"><span class="name">pitch</span><div class="track"><div class="base"></div><div class="fill" id="pPitch"></div></div><span class="val" id="vPitch">+14%</span></div>
+          <div class="prow"><span class="name">energy</span><div class="track"><div class="base"></div><div class="fill" id="pEnergy"></div></div><span class="val" id="vEnergy">+10%</span></div>
+          <div class="prow"><span class="name">rate</span><div class="track"><div class="base"></div><div class="fill" id="pRate"></div></div><span class="val" id="vRate">+20%</span></div>
+        </div>
+
+        <div class="section-label" style="margin-top:18px;">// emotion timeline</div>
+        <div id="timeline" style="display:flex; gap:8px;"></div>
+      </div>
+
+      <!-- guardrail -->
+      <div class="panel" id="guardPanel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="bar" id="guardBar"></span> guardrail · OR-gate</div>
+          <span class="chip" id="gateChip">● armed · monitoring</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Watches for <b style="color:var(--white)">distress</b>, not just volume. Any one signal ≥ 0.55 → support mode. Anger stays loud but its distress signals stay low — so it’s de-escalated, not escalated.</p>
+
+        <div style="display:flex; flex-direction:column; gap:13px;">
+          <div class="prow" style="grid-template-columns:120px 1fr 46px;">
+            <span class="name">acoustic distress</span>
+            <div class="track"><div class="fill" id="gAc" style="left:0; box-shadow:none;"></div></div>
+            <span class="val" id="gAcV">0.30</span>
+          </div>
+          <div class="prow" style="grid-template-columns:120px 1fr 46px;">
+            <span class="name">lexical crisis</span>
+            <div class="track"><div class="fill" id="gLex" style="left:0; box-shadow:none;"></div></div>
+            <span class="val" id="gLexV">0.18</span>
+          </div>
+          <div class="prow" style="grid-template-columns:120px 1fr 46px;">
+            <span class="name">distress prosody</span>
+            <div class="track"><div class="fill" id="gPro" style="left:0; box-shadow:none;"></div></div>
+            <span class="val" id="gProV">0.34</span>
+          </div>
+        </div>
+
+        <p class="note" id="gEvidence" style="margin-top:12px; display:none;"></p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const GRAD = {
+  warm:  'linear-gradient(135deg,#3a2a14,#5c3a18)',
+  green: 'linear-gradient(135deg,#1c2a18,#2e4424)',
+  brown: 'linear-gradient(135deg,#2a2014,#43321c)',
+  cool:  'linear-gradient(135deg,#142028,#203846)',
+  lime:  'linear-gradient(135deg,#1f2a12,#34461c)'
+};
+
+// Lumi's voice settings, chosen by detected emotion (drives ElevenLabs voice_settings)
+const VOICE = {
+  ANXIOUS:   { stab: '0.45', style: '0.35', speed: '0.96', amp: 0.7 },
+  EXPECTANT: { stab: '0.45', style: '0.30', speed: '1.00', amp: 0.5 },
+  ANGRY:     { stab: '0.40', style: '0.42', speed: '0.95', amp: 0.9 },
+  RELIEVED:  { stab: '0.30', style: '0.55', speed: '1.03', amp: 0.78 },
+  EAGER:     { stab: '0.30', style: '0.55', speed: '1.05', amp: 0.9 },
+  HAPPY:     { stab: '0.30', style: '0.55', speed: '1.04', amp: 0.85 },
+  DISTRESS:  { stab: '0.50', style: '0.30', speed: '0.92', amp: 0.6 }
+};
+
+const SCENARIOS = {
+  airpods: { label: 'Lost AirPods', turns: [
+    {
+      user: "Hi, um — I think someone took my AirPods. I left them on a seat in the Conservatory lounge and now they’re gone.",
+      emotion: 'ANXIOUS', color: '#ffc24d', conf: '0.84',
+      vad: { x: 30, y: 28, v: '−0.40', a: '+0.45', d: '−0.30' },
+      prosody: { pitch: 14, energy: 10, rate: 20 }, tone: 'warm · reassuring', red: false,
+      agent: "Oh no — I’m sorry, that’s stressful. Let’s get on it right away. I’m noting it now: AirPods, last seen on a seat in the Conservatory lounge. Roughly when were you last there? I’ll start a lost-item report and have someone check immediately.",
+      media: [{ glyph: '🛋️', t: 'The Conservatory Lounge', s: 'level 2 · last seen', grad: 'cool', src: 'The Lumen' }],
+      guard: { ac: 0.30, lex: 0.18, pro: 0.34, state: 'armed', ev: '' }
+    },
+    {
+      user: "Can you just pull up the security camera footage from the lounge? Then we can see exactly who took them.",
+      emotion: 'EXPECTANT', color: '#6fd3e0', conf: '0.78',
+      vad: { x: 52, y: 42, v: '+0.05', a: '+0.15', d: '+0.10' },
+      prosody: { pitch: 4, energy: 6, rate: 8 }, tone: 'informative · honest', red: false,
+      agent: "I completely understand wanting to see that. I have to be straight with you: our security footage can only be released as part of a police report and case — I can’t pull it up directly, and I’m sorry that’s not the answer you were hoping for. What I <b>can</b> do right now is send someone to physically sweep the lounge, check lost &amp; found, and file the report. Shall I start all three?",
+      guard: { ac: 0.34, lex: 0.20, pro: 0.38, state: 'armed', ev: '' }
+    },
+    {
+      user: "That’s ridiculous. So someone steals my stuff and you just won’t help me? That is not good enough.",
+      emotion: 'ANGRY', color: '#ff9a4d', conf: '0.89',
+      vad: { x: 16, y: 18, v: '−0.70', a: '+0.65', d: '+0.45' },
+      prosody: { pitch: 24, energy: 38, rate: 20 }, tone: 'de-escalating · accountable', red: false,
+      agent: "You’re right to be upset — this shouldn’t have happened to you, and I’m not brushing it off. Here’s exactly what I’m doing right now: I’ve dispatched a staff member to search the Conservatory lounge and lost &amp; found, and logged a formal report with a reference number. I’ll personally follow up within 15 minutes. If it isn’t recovered, I’ll walk you through filing the police report so the footage <b>can</b> be reviewed. You won’t be doing this alone.",
+      guard: { ac: 0.26, lex: 0.14, pro: 0.30, state: 'anger', ev: 'high arousal + raised voice, but distress signals low → classified service-anger, route to de-escalation (not crisis)' }
+    },
+    {
+      user: "Oh! Really? Someone turned them in? Oh thank god — thank you so much.",
+      emotion: 'RELIEVED', color: '#eaf8a1', conf: '0.87',
+      vad: { x: 78, y: 34, v: '+0.60', a: '+0.30', d: '+0.20' },
+      prosody: { pitch: 16, energy: 20, rate: 6 }, tone: 'warm · celebratory', red: false,
+      agent: "Yes! A staff member found them tucked beside the cushion and handed them to the front desk — they’re safe. I’m so glad. Would you like them brought up to your room, or will you collect them from the desk? Either way, I’ll add a little something to your stay for the trouble.",
+      media: [{ glyph: '🎧', t: 'AirPods recovered', s: 'front desk · ready', grad: 'lime', src: 'found' }],
+      guard: { ac: 0.10, lex: 0.05, pro: 0.18, state: 'armed', ev: '' }
+    }
+  ]},
+
+  dining: { label: 'Breakfast', turns: [
+    {
+      user: "I’m starving but I can’t decide what to get for breakfast. What’s good here?",
+      emotion: 'EAGER', color: '#eaf8a1', conf: '0.80',
+      vad: { x: 66, y: 30, v: '+0.35', a: '+0.40', d: '+0.10' },
+      prosody: { pitch: 10, energy: 18, rate: 12 }, tone: 'upbeat · appetizing', red: false,
+      agent: "Ooh, you’ve come to the right place — our kitchen does breakfast beautifully. If you’re really hungry, the Eggs Benedict is a guest favorite; the buttermilk pancakes if you’ve got a sweet tooth; or the avocado toast with poached eggs if you want something lighter. Want me to send any of these up?",
+      media: [
+        { glyph: '🍳', t: 'Eggs Benedict', s: '$24 · favorite', grad: 'warm' },
+        { glyph: '🥞', t: 'Buttermilk Pancakes', s: '$18', grad: 'brown' },
+        { glyph: '🥑', t: 'Avocado Toast', s: '$16 · light', grad: 'green' },
+        { glyph: '☕', t: 'Lumen Roast', s: '$6', grad: 'brown' }
+      ],
+      guard: { ac: 0.12, lex: 0.06, pro: 0.22, state: 'armed', ev: '' }
+    },
+    {
+      user: "Mmm, the Eggs Benedict sounds perfect. Let’s do that.",
+      emotion: 'HAPPY', color: '#eaf8a1', conf: '0.85',
+      vad: { x: 78, y: 36, v: '+0.60', a: '+0.25', d: '+0.25' },
+      prosody: { pitch: 8, energy: 14, rate: 4 }, tone: 'warm · efficient', red: false,
+      agent: "Excellent choice. One Eggs Benedict and a Lumen Roast on the way to your room — about 20 minutes. Anything to go with it, or shall I put the order in?",
+      media: [{ glyph: '🍳', t: 'Eggs Benedict', s: 'ordered · ~20 min', grad: 'warm', src: 'room service' }],
+      guard: { ac: 0.08, lex: 0.04, pro: 0.16, state: 'armed', ev: '' }
+    }
+  ]},
+
+  safety: { label: 'Safety', turns: [
+    {
+      user: "Um, hi. This is going to sound strange, but there’s someone who’s been following me around the hotel and it’s making me really uncomfortable.",
+      emotion: 'ANXIOUS', color: '#ffc24d', conf: '0.82',
+      vad: { x: 28, y: 32, v: '−0.45', a: '+0.35', d: '−0.40' },
+      prosody: { pitch: 12, energy: 8, rate: 16 }, tone: 'calm · attentive', red: false,
+      agent: "Thank you for telling me — I’m taking this seriously, and your safety comes first. Are you somewhere safe right now? I can stay with you here and quietly alert our security team to come to you.",
+      guard: { ac: 0.50, lex: 0.42, pro: 0.52, state: 'elevated', ev: 'unease + safety concern rising — watching closely' }
+    },
+    {
+      user: "He’s outside my room now. Please, I don’t know what to do, I’m really scared.",
+      emotion: 'DISTRESS', color: '#ff5a5a', conf: '0.92',
+      vad: { x: 10, y: 18, v: '−0.80', a: '+0.60', d: '−0.60' },
+      prosody: { pitch: 20, energy: 12, rate: 24 }, tone: 'support mode', red: true,
+      agent: "I’ve got you. I’m alerting hotel security right now and they’re on their way to your floor — stay inside with the door locked. I’m connecting you to our front-desk manager on the line as well. If you feel in immediate danger, call 911. I’m staying right here with you until someone reaches you.",
+      guard: { ac: 0.88, lex: 0.82, pro: 0.79, state: 'fired', ev: 'safety threat + fear: “outside my room”, “really scared”' }
+    }
+  ]}
+};
+
+const NS = 'http://www.w3.org/2000/svg';
+const RED = '#ff5a5a', LIME = '#eaf8a1', AMBER = '#ffc24d';
+
+function prosodyBar(el, valEl, delta) {
+  const pct = Math.min(Math.abs(delta), 100) / 100 * 50;
+  el.classList.toggle('neg', delta < 0);
+  if (delta >= 0) { el.style.left = '50%'; el.style.width = pct + '%'; }
+  else { el.style.left = (50 - pct) + '%'; el.style.width = pct + '%'; }
+  valEl.textContent = (delta >= 0 ? '+' : '−') + Math.abs(delta) + '%';
+}
+
+function miniwaveBars(amp) {
+  let h = '';
+  for (let i = 0; i < 24; i++) {
+    const seed = Math.sin(i * 1.7) * Math.cos(i * 0.6);   // deterministic
+    const v = 14 + Math.abs(seed) * 86 * amp;
+    h += `<i style="height:${Math.min(v, 100)}%"></i>`;
+  }
+  return h;
+}
+
+function mediaHTML(media) {
+  if (!media || !media.length) return '';
+  const tiles = media.map(m =>
+    `<div class="media-tile">
+       <div class="pic" style="background:${GRAD[m.grad]}">${m.glyph}<span class="src">${m.src || 'The Lumen'}</span></div>
+       <div class="cap"><div class="t">${m.t}</div><div class="s">${m.s}</div></div>
+     </div>`).join('');
+  return `<div class="media-label">▦ showing on screen</div><div class="media-grid">${tiles}</div>`;
+}
+
+function renderTranscript(scn, upto) {
+  const t = document.getElementById('transcript');
+  t.innerHTML = '';
+  for (let i = 0; i <= upto; i++) {
+    const T = scn.turns[i];
+    const v = VOICE[T.emotion] || VOICE.EXPECTANT;
+    const isLast = i === upto;
+    t.innerHTML +=
+      `<div class="msg user">
+         <span class="who">guest · turn ${i+1} · <b style="color:${T.color}">${T.emotion}</b> ${T.conf}</span>
+         <div class="bubble">${T.user}</div>
+       </div>
+       <div class="msg agent ${T.red ? 'red' : ''} ${isLast ? 'speaking' : ''}">
+         <span class="who">Lumi · ${T.tone}</span>
+         <div class="bubble">
+           ${T.agent}
+           ${mediaHTML(T.media)}
+           <div class="bubble-audio">
+             <div class="mini-play">▶</div>
+             <div class="miniwave">${miniwaveBars(v.amp)}</div>
+             <span class="vlabel">elevenlabs · stab ${v.stab} · style ${v.style} · ${v.speed}×</span>
+           </div>
+         </div>
+       </div>`;
+  }
+  t.scrollTop = t.scrollHeight;
+}
+
+function renderTraj(scn, upto) {
+  const svg = document.getElementById('traj');
+  svg.innerHTML = '';
+  const pts = scn.turns.slice(0, upto + 1).map(t => [t.vad.x, t.vad.y]);
+  if (pts.length > 1) {
+    const pl = document.createElementNS(NS, 'polyline');
+    pl.setAttribute('points', pts.map(p => p.join(',')).join(' '));
+    pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', '#9aa08f');
+    pl.setAttribute('stroke-width', '0.7'); pl.setAttribute('stroke-dasharray', '2.5 2');
+    pl.setAttribute('opacity', '0.55');
+    svg.appendChild(pl);
+  }
+  pts.forEach((p, i) => {
+    const cur = i === upto;
+    if (cur) {
+      const halo = document.createElementNS(NS, 'circle');
+      halo.setAttribute('cx', p[0]); halo.setAttribute('cy', p[1]); halo.setAttribute('r', '5.5');
+      halo.setAttribute('fill', scn.turns[i].color); halo.setAttribute('opacity', '0.2');
+      svg.appendChild(halo);
+    }
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]);
+    c.setAttribute('r', cur ? '3' : '1.9'); c.setAttribute('fill', scn.turns[i].color);
+    c.setAttribute('opacity', cur ? '1' : '0.4');
+    svg.appendChild(c);
+    const tx = document.createElementNS(NS, 'text');
+    tx.setAttribute('x', p[0]); tx.setAttribute('y', p[1] - 4.5);
+    tx.setAttribute('fill', scn.turns[i].color); tx.setAttribute('font-size', '3.6');
+    tx.setAttribute('text-anchor', 'middle'); tx.setAttribute('font-family', 'monospace');
+    tx.setAttribute('opacity', cur ? '1' : '0.45');
+    tx.textContent = 'T' + (i + 1);
+    svg.appendChild(tx);
+  });
+}
+
+function renderTimeline(scn, upto) {
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  scn.turns.forEach((T, i) => {
+    const on = i <= upto;
+    tl.innerHTML +=
+      `<div style="flex:1; text-align:center; font-family:var(--mono); font-size:10px; padding:9px 4px; border-radius:8px;
+            border:1px solid ${on ? T.color : 'var(--line)'}; color:${on ? T.color : 'var(--muted-2)'};
+            background:${on ? 'rgba(255,255,255,0.03)' : 'transparent'}; transition:0.3s;">
+         <div style="opacity:0.55">T${i+1}</div>
+         <div style="font-weight:700; margin-top:3px;">${on ? T.emotion : '—'}</div>
+       </div>`;
+  });
+}
+
+function gbar(id, vid, val) {
+  const fill = document.getElementById(id);
+  const over = val >= 0.55;
+  fill.style.width = (val * 100) + '%';
+  fill.style.background = over ? RED : (val >= 0.40 ? AMBER : 'var(--muted-2)');
+  fill.style.boxShadow = over ? '0 0 8px var(--red-glow)' : 'none';
+  document.getElementById(vid).textContent = val.toFixed(2);
+}
+
+function setGate(T) {
+  gbar('gAc', 'gAcV', T.guard.ac);
+  gbar('gLex', 'gLexV', T.guard.lex);
+  gbar('gPro', 'gProV', T.guard.pro);
+  const chip = document.getElementById('gateChip');
+  const map = {
+    armed:    ['chip',       '● armed · monitoring',          'armed',    'var(--white)'],
+    elevated: ['chip amber', '▲ elevated · watching',          'elevated', AMBER],
+    anger:    ['chip amber', '▲ anger · de-escalating',        'anger',    AMBER],
+    fired:    ['chip red',   '⛔ FIRED · support mode',         'FIRED',    RED]
+  };
+  const m = map[T.guard.state];
+  chip.className = m[0]; chip.textContent = m[1];
+  const gs = document.getElementById('guardState');
+  gs.textContent = m[2]; gs.style.color = m[3];
+  const ev = document.getElementById('gEvidence');
+  if (T.guard.ev) { ev.style.display = 'block'; ev.textContent = '› ' + T.guard.ev; ev.style.color = T.guard.state === 'fired' ? RED : (T.guard.state === 'armed' ? 'var(--muted)' : AMBER); }
+  else { ev.style.display = 'none'; }
+}
+
+function setMode(fired) {
+  document.body.classList.toggle('redmode', fired);
+  document.getElementById('modeDot').className = 'dot ' + (fired ? 'crit' : 'live');
+  const lbl = document.getElementById('modeLbl');
+  lbl.textContent = fired ? 'RED · SUPPORT' : 'NORMAL';
+  lbl.style.color = fired ? RED : 'var(--white)';
+  document.getElementById('crisis').style.display = fired ? 'flex' : 'none';
+  document.getElementById('disclaimer').style.display = fired ? 'block' : 'none';
+  const gp = document.getElementById('guardPanel'), cp = document.getElementById('convPanel');
+  gp.style.borderColor = fired ? RED : 'var(--line)';
+  gp.style.boxShadow = fired ? '0 0 0 1px var(--red-dim), 0 0 40px rgba(255,90,90,0.06)' : 'none';
+  cp.style.borderColor = fired ? RED : 'var(--line)';
+  document.getElementById('convBar').style.background = fired ? RED : 'var(--lime)';
+  document.getElementById('guardBar').style.background = fired ? RED : 'var(--lime)';
+  document.getElementById('convChip').className = 'chip ' + (fired ? 'red' : 'on');
+  document.getElementById('convChip').textContent = fired ? '● support mode · chit-chat suppressed' : 'turn-based · push-to-talk';
+}
+
+let scnKey = 'airpods', idx = 0;
+
+function render() {
+  const scn = SCENARIOS[scnKey];
+  const T = scn.turns[idx];
+  const v = document.getElementById('verdict');
+  v.textContent = T.emotion; v.style.color = T.color;
+  document.getElementById('conf').textContent = T.conf;
+  document.getElementById('vV').textContent = T.vad.v;
+  document.getElementById('vA').textContent = T.vad.a;
+  document.getElementById('vD').textContent = T.vad.d;
+  prosodyBar(document.getElementById('pPitch'), document.getElementById('vPitch'), T.prosody.pitch);
+  prosodyBar(document.getElementById('pEnergy'), document.getElementById('vEnergy'), T.prosody.energy);
+  prosodyBar(document.getElementById('pRate'), document.getElementById('vRate'), T.prosody.rate);
+
+  renderTranscript(scn, idx);
+  renderTraj(scn, idx);
+  renderTimeline(scn, idx);
+  setGate(T);
+  setMode(!!T.red);
+
+  document.getElementById('counter').textContent = `turn ${idx + 1} / ${scn.turns.length}`;
+  const nb = document.getElementById('nextBtn');
+  const last = idx === scn.turns.length - 1;
+  nb.textContent = last ? '✓ end of scenario' : '▶ next turn';
+  nb.className = 'btn ' + (T.red ? 'danger' : 'primary');
+
+  document.querySelectorAll('#tabs .tab').forEach(tab => {
+    const on = tab.dataset.scn === scnKey;
+    tab.classList.toggle('active', on);
+    tab.classList.toggle('red', scnKey === 'safety' && on);
+  });
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (idx < SCENARIOS[scnKey].turns.length - 1) { idx++; render(); }
+});
+document.getElementById('resetBtn').addEventListener('click', () => { idx = 0; render(); });
+document.querySelectorAll('#tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => { scnKey = tab.dataset.scn; idx = 0; render(); });
+});
+
+render();
+</script>
+
+</body>
+</html>

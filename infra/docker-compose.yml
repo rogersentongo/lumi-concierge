@@ -1,0 +1,24 @@
+# Lumi — OUR OWN isolated data stores. NEVER CityPulse's Postgres (5432/5433) or Redis (6379).
+# Both bind 127.0.0.1 only. Bring up on the box:  docker compose -p lumi up -d
+name: lumi
+services:
+  lumi-postgres:
+    image: postgres:17
+    container_name: lumi-postgres
+    environment:
+      POSTGRES_DB: lumi
+      POSTGRES_USER: lumi
+      POSTGRES_PASSWORD: ${LUMI_PG_PASSWORD:-lumi_local_dev}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - lumi_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+  lumi-redis:
+    image: redis:7
+    container_name: lumi-redis
+    ports:
+      - "127.0.0.1:6380:6379"
+    restart: unless-stopped
+volumes:
+  lumi_pgdata:

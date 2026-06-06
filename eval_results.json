@@ -1,0 +1,43 @@
+{
+  "available": true,
+  "dataset": "CREMA-D (IEO, same words)",
+  "n": 48,
+  "acoustic_accuracy": 0.938,
+  "text_accuracy": 0.167,
+  "per_emotion": [
+    {
+      "label": "ANG",
+      "acoustic": 0.875,
+      "text": 0.0
+    },
+    {
+      "label": "DIS",
+      "acoustic": 1.0,
+      "text": 0.0
+    },
+    {
+      "label": "FEA",
+      "acoustic": 0.875,
+      "text": 0.0
+    },
+    {
+      "label": "HAP",
+      "acoustic": 1.0,
+      "text": 0.0
+    },
+    {
+      "label": "NEU",
+      "acoustic": 1.0,
+      "text": 1.0
+    },
+    {
+      "label": "SAD",
+      "acoustic": 0.875,
+      "text": 0.0
+    }
+  ],
+  "latency_ms": {
+    "p50": 642,
+    "p95": 689
+  }
+}

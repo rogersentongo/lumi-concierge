@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/styles.css">
+<title>Lumi — Operator Console</title>
+<style>
+  .wrap2 { max-width: 1100px; margin: 0 auto; padding: 22px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+  .tabx { font-family: var(--mono); font-size: 13px; padding: 9px 16px; border: 1px solid var(--line);
+          border-radius: 10px; background: var(--panel-2); color: var(--muted); cursor: pointer; }
+  .tabx.active { color: var(--lime); border-color: var(--lime); background: var(--lime-dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+  th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--muted); letter-spacing: .1em; }
+  .feed .row { padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+  .ebar { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 10px; margin-bottom: 8px; font-family: var(--mono); font-size: 12px; }
+  .ebar .b { height: 9px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .ebar .b i { display: block; height: 100%; background: var(--lime); }
+  .placeholder { color: var(--muted); font-family: var(--mono); font-size: 13px; padding: 30px; text-align: center; }
+  .cmd { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--lime); display: inline-block; margin-top: 10px; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="backlink" href="/">← app</a>
+    <div class="brand"><span class="logo">lumi<b>.</b></span><span class="tag">operator console</span></div>
+    <div class="spacer"></div>
+    <div class="statline"><span class="stat" id="status">loading…</span></div>
+  </div>
+
+  <div class="wrap2">
+    <div class="tabs">
+      <div class="tabx active" data-tab="live">Live Sessions</div>
+      <div class="tabx" data-tab="proof">Proof · Evaluation</div>
+    </div>
+
+    <!-- LIVE -->
+    <div id="live">
+      <div class="grid-3" id="totals"></div>
+      <div class="grid-2" style="margin-top:18px;">
+        <div class="panel"><div class="panel-title"><span class="bar"></span> emotions detected</div><div id="emos" style="margin-top:14px;"></div></div>
+        <div class="panel"><div class="panel-title"><span class="bar" style="background:var(--red)"></span> open complaints</div><div id="complaints" style="margin-top:14px;"></div></div>
+      </div>
+      <div class="panel" style="margin-top:18px;"><div class="panel-title"><span class="bar"></span> guests</div><div id="guests" style="margin-top:12px; overflow-x:auto;"></div></div>
+      <div class="panel" style="margin-top:18px;"><div class="panel-title"><span class="bar"></span> recent turns</div><div id="recent" class="feed" style="margin-top:8px;"></div></div>
+    </div>
+
+    <!-- PROOF -->
+    <div id="proof" style="display:none;"></div>
+  </div>
+
+<script>
+const COLORS = { calm:'#1a9d5b',happy:'#1a9d5b',relieved:'#1a9d5b',eager:'#c07c12',neutral:'#5b6070',
+  expectant:'#0a84ff',anxious:'#b8860b',frustrated:'#d2691e',angry:'#cc3a1f',distress:'#ff3b30' };
+const ec = (e) => COLORS[e] || '#9aa08f';
+
+document.querySelectorAll('.tabx').forEach((t) => t.addEventListener('click', () => {
+  document.querySelectorAll('.tabx').forEach((x) => x.classList.remove('active'));
+  t.classList.add('active');
+  const tab = t.dataset.tab;
+  document.getElementById('live').style.display = tab === 'live' ? 'block' : 'none';
+  document.getElementById('proof').style.display = tab === 'proof' ? 'block' : 'none';
+  if (tab === 'proof') loadProof();
+}));
+
+function card(k, v, sub) {
+  return `<div class="statcard"><div class="k">${k}</div><div class="v">${v}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div>`;
+}
+
+async function loadLive() {
+  let d;
+  try { d = await (await fetch('/api/stats')).json(); } catch (e) { return; }
+  if (d.error) { document.getElementById('status').textContent = d.error; return; }
+  document.getElementById('status').innerHTML = '<span class="dot live"></span> live';
+  const t = d.totals || {};
+  document.getElementById('totals').innerHTML =
+    card('guests', t.guests ?? 0) + card('sessions', t.sessions ?? 0) +
+    card('turns', t.turns ?? 0, (t.complaints ?? 0) + ' open complaints');
+
+  const max = Math.max(1, ...(d.by_emotion || []).map((x) => x.count));
+  document.getElementById('emos').innerHTML = (d.by_emotion || []).map((x) =>
+    `<div class="ebar"><span style="color:${ec(x.emotion)}">${x.emotion}</span>` +
+    `<div class="b"><i style="width:${x.count / max * 100}%;background:${ec(x.emotion)}"></i></div><span>${x.count}</span></div>`
+  ).join('') || '<span class="placeholder">no turns yet</span>';
+
+  document.getElementById('complaints').innerHTML = (d.complaints || []).map((c) =>
+    `<div class="feed"><div class="row"><span class="mono" style="color:var(--red)">●</span> ${c.text} <span style="color:var(--muted)">· ${c.guest} · ${c.status}</span></div></div>`
+  ).join('') || '<span class="placeholder">none</span>';
+
+  document.getElementById('guests').innerHTML =
+    '<table><tr><th>guest</th><th>name</th><th>room</th><th>turns</th><th>emotions</th><th>last seen</th></tr>' +
+    (d.guests || []).map((g) =>
+      `<tr><td class="mono">${g.id}</td><td>${g.name || '—'}</td><td>${g.room || '—'}</td><td>${g.turns}</td>` +
+      `<td>${(g.emotions || []).map((e) => `<span class="chip" style="color:${ec(e)}">${e}</span>`).join(' ')}</td>` +
+      `<td class="mono" style="color:var(--muted)">${g.last ? g.last.slice(11, 19) : '—'}</td></tr>`
+    ).join('') + '</table>';
+
+  document.getElementById('recent').innerHTML = (d.recent || []).map((r) =>
+    `<div class="row"><span class="mono" style="color:var(--muted)">${(r.ts || '').slice(11, 19)}</span> ` +
+    `<b style="color:${ec(r.emotion)}">${(r.emotion || '?').toUpperCase()}</b> ` +
+    `<span class="muted">${r.guest}</span> — "${r.said}" → <span class="muted">${r.reply}</span></div>`
+  ).join('') || '<span class="placeholder">no turns yet</span>';
+}
+
+async function loadProof() {
+  const el = document.getElementById('proof');
+  let d;
+  try { d = await (await fetch('/api/eval')).json(); } catch (e) { d = { available: false }; }
+  if (!d.available) {
+    el.innerHTML = `<div class="panel"><div class="placeholder">No evaluation has been run yet.<br>` +
+      `Run it on the box:<div class="cmd">python3 server/eval_run.py</div></div></div>`;
+    return;
+  }
+  const ac = Math.round(d.acoustic_accuracy * 100), tx = Math.round(d.text_accuracy * 100);
+  let html = `<div class="grid-3">` +
+    card('acoustic accuracy', ac + '%', d.dataset + ' · n=' + d.n) +
+    `<div class="statcard"><div class="k">text-only accuracy</div><div class="v" style="color:var(--cyan)">${tx}%</div><div class="sub">identical words → can't tell emotions apart</div></div>` +
+    card('Δ acoustic − text', '+' + (ac - tx) + ' pts', 'the whole argument') + `</div>`;
+  html += `<div class="panel" style="margin-top:18px;"><div class="panel-title"><span class="bar"></span> per-emotion recall — acoustic vs text-only</div><div style="margin-top:14px;">`;
+  (d.per_emotion || []).forEach((p) => {
+    html += `<div style="margin-bottom:12px;"><div class="mono" style="font-size:12px;margin-bottom:5px;">${p.label} ` +
+      `&nbsp;<span style="color:var(--lime)">acoustic ${Math.round(p.acoustic*100)}%</span> ` +
+      `<span style="color:var(--cyan)">text ${Math.round(p.text*100)}%</span></div>` +
+      `<div class="ebar" style="grid-template-columns:1fr;gap:5px;"><div class="b"><i style="width:${p.acoustic*100}%"></i></div>` +
+      `<div class="b"><i style="width:${p.text*100}%;background:var(--cyan)"></i></div></div></div>`;
+  });
+  html += `</div></div>`;
+  if (d.latency_ms) html += `<div class="panel" style="margin-top:18px;"><div class="panel-title"><span class="bar"></span> latency</div>` +
+    `<p style="margin-top:12px;font-family:var(--mono);font-size:13px;">p50 ${d.latency_ms.p50}ms · p95 ${d.latency_ms.p95}ms · <span class="accent">$0 / inference</span></p></div>`;
+  el.innerHTML = html;
+}
+
+loadLive();
+setInterval(() => { if (document.getElementById('live').style.display !== 'none') loadLive(); }, 5000);
+</script>
+</body>
+</html>

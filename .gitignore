@@ -1,0 +1,47 @@
+# --- secrets & local-only (NEVER commit) ---
+.env
+.env.*
+!.env.example
+CLAUDE.local.md
+*.key
+*.pem
+secrets/
+
+# --- python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# --- node / web ---
+node_modules/
+dist/
+build/
+.next/
+
+# --- models & big artifacts ---
+models/
+*.onnx
+*.bin
+*.safetensors
+
+# --- audio test clips (keep curated fixtures explicitly if needed) ---
+*.wav
+*.m4a
+*.mp3
+!fixtures/**
+
+# --- misc ---
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+# curated demo images (locally fetched via SearXNG, not committed)
+app/static/media/
+server/media/
+
+# generated audio + voice previews (local only)
+app/out/
